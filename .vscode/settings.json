@@ -1,0 +1,83 @@
+{
+  //    ██████╗ ██╗      ██████╗ ██████╗  █████╗ ██╗
+  //   ██╔════╝ ██║     ██╔═══██╗██╔══██╗██╔══██╗██║
+  //   ██║  ███╗██║     ██║   ██║██████╔╝███████║██║
+  //   ██║   ██║██║     ██║   ██║██╔══██╗██╔══██║██║
+  //   ╚██████╔╝███████╗╚██████╔╝██████╔╝██║  ██║███████╗
+  //    ╚═════╝ ╚══════╝ ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝
+  "editor.tabSize": 4,
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": false,
+  "files.exclude": {
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "**/node_modules": true,
+    "**/.venv": true,
+    "**/.storage": true,
+    "**/.mypy_cache": true,
+    "**/.next": true
+  },
+  "[shellscript]": {
+    "editor.defaultFormatter": "foxundermoon.shell-format"
+  },
+  "[ignore]": {
+    "editor.defaultFormatter": "foxundermoon.shell-format"
+  },
+  "[properties]": {
+    "editor.defaultFormatter": "foxundermoon.shell-format"
+  },
+  "[dockerfile]": {
+    "editor.defaultFormatter": "foxundermoon.shell-format"
+  },
+  "[dotenv]": {
+    "editor.defaultFormatter": "foxundermoon.shell-format"
+  },
+
+  //   ███╗   ██╗ ██████╗ ██████╗ ███████╗
+  //   ████╗  ██║██╔═══██╗██╔══██╗██╔════╝
+  //   ██╔██╗ ██║██║   ██║██║  ██║█████╗
+  //   ██║╚██╗██║██║   ██║██║  ██║██╔══╝
+  //   ██║ ╚████║╚██████╔╝██████╔╝███████╗
+  //   ╚═╝  ╚═══╝ ╚═════╝ ╚═════╝ ╚══════╝
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[javascript,typescript,typescriptreact]": {
+    // "importSorter.generalConfiguration.sortOnBeforeSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnType": true,
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": true,
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": "explicit",
+        "source.sortImports": "explicit"
+    }
+  },
+  //   ██████╗ ██╗   ██╗████████╗██╗  ██╗ ██████╗ ███╗   ██╗
+  //   ██╔══██╗╚██╗ ██╔╝╚══██╔══╝██║  ██║██╔═══██╗████╗  ██║
+  //   ██████╔╝ ╚████╔╝    ██║   ███████║██║   ██║██╔██╗ ██║
+  //   ██╔═══╝   ╚██╔╝     ██║   ██╔══██║██║   ██║██║╚██╗██║
+  //   ██║        ██║      ██║   ██║  ██║╚██████╔╝██║ ╚████║
+  //   ╚═╝        ╚═╝      ╚═╝   ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝
+  "python.autoComplete.extraPaths": [
+    "./back/.venv/lib/python3.11/site-packages"
+  ],
+  "black-formatter.args": ["--line-length", "80"],
+  "python.analysis.autoImportCompletions": true,
+  "python.analysis.indexing": true,
+  "python.analysis.extraPaths": [
+    "./back/.venv/lib/python3.11/site-packages/",
+    "./back/"
+  ],
+  "ruff.lint.args": ["--config=./back/pyproject.toml"],
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter",
+    "editor.tabSize": 4,
+    "editor.formatOnType": true,
+    "editor.formatOnPaste": true,
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": "explicit",
+        "source.organizeImports.ruff": "explicit"
+    }
+  },
+  "mypy-type-checker.path": ["./back/pyproject.toml"]
+}

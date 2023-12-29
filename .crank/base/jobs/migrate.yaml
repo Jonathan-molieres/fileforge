@@ -1,0 +1,28 @@
+#      ██╗ ██████╗ ██████╗
+#      ██║██╔═══██╗██╔══██╗
+#      ██║██║   ██║██████╔╝
+# ██   ██║██║   ██║██╔══██╗
+# ╚█████╔╝╚██████╔╝██████╔╝
+#  ╚════╝  ╚═════╝ ╚═════╝
+apiVersion: batch/v1
+kind: Job
+metadata:
+    name: fixtures-job
+spec:
+    template:
+        metadata:
+            name: fixtures-job-pod
+        spec:
+            restartPolicy: OnFailure
+            containers:
+                - name: fixtures-job-container
+                  image: ${CONTAINER_REGISTRY}/back:${DEPLOY_TAG}
+                  command: ['./entrypoint']
+                  args: ['migrate']
+                  envFrom:
+                      - configMapRef:
+                            name: config
+                      - secretRef:
+                            name: secrets
+
+    backoffLimit: 1

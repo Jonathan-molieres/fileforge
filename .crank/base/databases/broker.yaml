@@ -1,0 +1,88 @@
+# ██████╗ ███████╗██████╗ ██╗      ██████╗ ██╗   ██╗███╗   ███╗███████╗███╗   ██╗████████╗
+# ██╔══██╗██╔════╝██╔══██╗██║     ██╔═══██╗╚██╗ ██╔╝████╗ ████║██╔════╝████╗  ██║╚══██╔══╝
+# ██║  ██║█████╗  ██████╔╝██║     ██║   ██║ ╚████╔╝ ██╔████╔██║█████╗  ██╔██╗ ██║   ██║
+# ██║  ██║██╔══╝  ██╔═══╝ ██║     ██║   ██║  ╚██╔╝  ██║╚██╔╝██║██╔══╝  ██║╚██╗██║   ██║
+# ██████╔╝███████╗██║     ███████╗╚██████╔╝   ██║   ██║ ╚═╝ ██║███████╗██║ ╚████║   ██║
+# ╚═════╝ ╚══════╝╚═╝     ╚══════╝ ╚═════╝    ╚═╝   ╚═╝     ╚═╝╚══════╝╚═╝  ╚═══╝   ╚═╝
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: broker-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: broker
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: broker
+    spec:
+      containers:
+        - name: broker
+          image: redis:7.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 6379
+              protocol: TCP
+          env:
+            - name: MASTER
+              value: "true"
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "0.1"
+            limits:
+              memory: "256Mi"
+              cpu: "0.1"
+          volumeMounts:
+            - mountPath: /data
+              name: broker-data-volume
+              subPath: redis
+      volumes:
+        - name: broker-data-volume
+          persistentVolumeClaim:
+            claimName: broker-persistent-volume-claim
+
+---
+# ██╗   ██╗ ██████╗ ██╗     ██╗   ██╗███╗   ███╗███████╗
+# ██║   ██║██╔═══██╗██║     ██║   ██║████╗ ████║██╔════╝
+# ██║   ██║██║   ██║██║     ██║   ██║██╔████╔██║█████╗
+# ╚██╗ ██╔╝██║   ██║██║     ██║   ██║██║╚██╔╝██║██╔══╝
+#  ╚████╔╝ ╚██████╔╝███████╗╚██████╔╝██║ ╚═╝ ██║███████╗
+#   ╚═══╝   ╚═════╝ ╚══════╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: broker-persistent-volume-claim
+  labels:
+    app: broker
+spec:
+  storageClassName: managed-premium
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 0.5Gi
+
+---
+# ███████╗███████╗██████╗ ██╗   ██╗██╗ ██████╗███████╗
+# ██╔════╝██╔════╝██╔══██╗██║   ██║██║██╔════╝██╔════╝
+# ███████╗█████╗  ██████╔╝██║   ██║██║██║     █████╗
+# ╚════██║██╔══╝  ██╔══██╗╚██╗ ██╔╝██║██║     ██╔══╝
+# ███████║███████╗██║  ██║ ╚████╔╝ ██║╚██████╗███████╗
+# ╚══════╝╚══════╝╚═╝  ╚═╝  ╚═══╝  ╚═╝ ╚═════╝╚══════╝
+apiVersion: v1
+kind: Service
+metadata:
+  name: broker-service
+  labels:
+    app: broker
+spec:
+  selector:
+    app: broker
+  ports:
+    - port: 6379
+      protocol: TCP

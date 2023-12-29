@@ -1,0 +1,126 @@
+# ███████╗████████╗ █████╗ ████████╗███████╗███████╗██╗   ██╗██╗     ███████╗███████╗████████╗
+# ██╔════╝╚══██╔══╝██╔══██╗╚══██╔══╝██╔════╝██╔════╝██║   ██║██║     ██╔════╝██╔════╝╚══██╔══╝
+# ███████╗   ██║   ███████║   ██║   █████╗  █████╗  ██║   ██║██║     ███████╗█████╗     ██║   
+# ╚════██║   ██║   ██╔══██║   ██║   ██╔══╝  ██╔══╝  ██║   ██║██║     ╚════██║██╔══╝     ██║   
+# ███████║   ██║   ██║  ██║   ██║   ███████╗██║     ╚██████╔╝███████╗███████║███████╗   ██║   
+# ╚══════╝   ╚═╝   ╚═╝  ╚═╝   ╚═╝   ╚══════╝╚═╝      ╚═════╝ ╚══════╝╚══════╝╚══════╝   ╚═╝   
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+    name: elasticsearch-cluster
+spec:
+    serviceName: elasticsearch-service
+    replicas: 1
+    selector:
+        matchLabels:
+            app: elasticsearch
+    template:
+        metadata:
+            labels:
+                app: elasticsearch
+        spec:
+            # Set affinity with node instance
+            # affinity:
+            #     nodeAffinity:
+            #         requiredDuringSchedulingIgnoredDuringExecution:
+            #             nodeSelectorTerms:
+            #                 - matchExpressions:
+            #                       - key: 
+            #                         operator: In
+            #                         values:
+            containers:
+                - name: elasticsearch-pod
+                  image: docker.elastic.co/elasticsearch/elasticsearch:8.10.0
+                  resources:
+                      requests:
+                          cpu: '0.5'
+                          memory: 1Gi
+                      limits:
+                          cpu: '1'
+                          memory: 2Gi
+                  ports:
+                      - containerPort: 9200
+                        name: rest
+                        protocol: TCP
+                      - containerPort: 9300
+                        name: inter-node
+                        protocol: TCP
+                  volumeMounts:
+                      - name: elasticsearch-volume
+                        mountPath: /usr/share/elasticsearch/data
+                  env:
+                      - name: cluster.name
+                        value: k8s-logs
+                      - name: node.name
+                        valueFrom:
+                            fieldRef:
+                                fieldPath: metadata.name
+
+                      - name: discovery.seed_hosts
+                        value: 'elasticsearch-cluster-0.elasticsearch-service,elasticsearch-cluster-1.elasticsearch-service,elasticsearch-cluster-2.elasticsearch-service'
+                        # pods.service.namespace
+                      - name: cluster.initial_master_nodes
+                        value: 'elasticsearch-cluster-0,elasticsearch-cluster-1,elasticsearch-cluster-2'
+        
+                      - name: ES_JAVA_OPTS
+                        # value: '-Xms512m -Xmx512m'
+                        value: '-Xms1g -Xmx1g'
+                      - name: xpack.security.enabled
+                        value: 'false'
+                      - name: xpack.security.transport.ssl.enabled
+                        value: 'false'
+            initContainers:
+                - name: fix-permissions
+                  image: busybox
+                  command: ['sh', '-c', 'chown -R 1000:1000 /usr/share/elasticsearch/data']
+                  securityContext:
+                      privileged: true
+                  volumeMounts:
+                      - name: elasticsearch-volume
+                        mountPath: /usr/share/elasticsearch/data
+                - name: increase-vm-max-map
+                  image: busybox
+                  command: ['sysctl', '-w', 'vm.max_map_count=262144']
+                  securityContext:
+                      privileged: true
+                - name: increase-fd-ulimit
+                  image: busybox
+                  command: ['sh', '-c', 'ulimit -n 65536']
+                  securityContext:
+                      privileged: true
+
+    volumeClaimTemplates:
+        - metadata:
+              name: elasticsearch-volume
+              labels:
+                  app: elasticsearch
+          spec:
+              storageClassName: premium-rwo
+              accessModes:
+                  - ReadWriteOnce
+              resources:
+                  requests:
+                      storage: 10Gi
+
+---
+# ███████╗███████╗██████╗ ██╗   ██╗██╗ ██████╗███████╗
+# ██╔════╝██╔════╝██╔══██╗██║   ██║██║██╔════╝██╔════╝
+# ███████╗█████╗  ██████╔╝██║   ██║██║██║     █████╗
+# ╚════██║██╔══╝  ██╔══██╗╚██╗ ██╔╝██║██║     ██╔══╝
+# ███████║███████╗██║  ██║ ╚████╔╝ ██║╚██████╗███████╗
+# ╚══════╝╚══════╝╚═╝  ╚═╝  ╚═══╝  ╚═╝ ╚═════╝╚══════╝
+kind: Service
+apiVersion: v1
+metadata:
+    name: elasticsearch-service
+    labels:
+        app: elasticsearch
+spec:
+    selector:
+        app: elasticsearch
+    clusterIP: None
+    ports:
+        - port: 9200
+          name: rest
+        - port: 9300
+          name: inter-node

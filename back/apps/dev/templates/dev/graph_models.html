@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <script
+      crossorigin
+      src="https://unpkg.com/react@18/umd/react.production.min.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/@mui/material@5.11.14/umd/material-ui.production.min.js"
+    ></script>
+
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <script
+      crossorigin
+      src="https://cdnjs.cloudflare.com/ajax/libs/gojs/2.3.4/go.min.js"
+      integrity="sha512-KTv0zp70MKC0wnC2J7bbEtVrwBoGW/ZnfmcsUXcQbVB9NruCq1xubY2evYV4fhQQorCx78TOpgPPmL/yLNe1ug=="
+      referrerpolicy="no-referrer"
+    ></script>
+    <script src="https://unpkg.com/gojs-react/dist/gojsreact.production.min.js"></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/universal-cookie@3/umd/universalCookie.min.js"
+    ></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="text/babel" src="/dev/statics/GraphModels.js"></script>
+    <script type="text/babel" src="/dev/statics/Root.js"></script>
+    <script type="text/babel">
+      {% verbatim %}
+        ReactDOM.render(<Root />, document.getElementById('root'))
+        {% endverbatim %}
+    </script>
+  </body>
+</html>

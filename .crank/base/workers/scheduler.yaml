@@ -1,0 +1,50 @@
+# Scheduler pod for main API from back image
+# ██████╗ ███████╗██████╗ ██╗      ██████╗ ██╗   ██╗███╗   ███╗███████╗███╗   ██╗████████╗
+# ██╔══██╗██╔════╝██╔══██╗██║     ██╔═══██╗╚██╗ ██╔╝████╗ ████║██╔════╝████╗  ██║╚══██╔══╝
+# ██║  ██║█████╗  ██████╔╝██║     ██║   ██║ ╚████╔╝ ██╔████╔██║█████╗  ██╔██╗ ██║   ██║
+# ██║  ██║██╔══╝  ██╔═══╝ ██║     ██║   ██║  ╚██╔╝  ██║╚██╔╝██║██╔══╝  ██║╚██╗██║   ██║
+# ██████╔╝███████╗██║     ███████╗╚██████╔╝   ██║   ██║ ╚═╝ ██║███████╗██║ ╚████║   ██║
+# ╚═════╝ ╚══════╝╚═╝     ╚══════╝ ╚═════╝    ╚═╝   ╚═╝     ╚═╝╚══════╝╚═╝  ╚═══╝   ╚═╝
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: scheduler-deployment
+spec:
+    selector:
+        matchLabels:
+            app: scheduler
+    strategy:
+        type: Recreate
+    replicas: 1
+    template:
+        metadata:
+            labels:
+                app: scheduler
+        spec:
+            # affinity:
+            #     nodeAffinity:
+            #         requiredDuringSchedulingIgnoredDuringExecution:
+            #             nodeSelectorTerms:
+            #                 - matchExpressions:
+            #                       - key: cloud.google.com/gke-nodepool
+            #                         operator: In
+            #                         values:
+            #                             - workers
+            containers:
+                - name: scheduler-container
+                  image: ${CONTAINER_REGISTRY}/back:${DEPLOY_TAG}
+                  imagePullPolicy: 'Always'
+                  command: ['./entrypoint']
+                  args: ['celery-schedule']
+                  envFrom:
+                      - configMapRef:
+                            name: config
+                      - secretRef:
+                            name: secrets
+                  # resources:
+                  #     requests:
+                  #         memory: 256Mi
+                  #         cpu: '0.05'
+                  #     limits:
+                  #         memory: 256Mi
+                  #         cpu: '0.1'

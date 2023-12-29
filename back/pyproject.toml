@@ -1,0 +1,66 @@
+[tool.poetry]
+name = "api"
+version = "0.1.0"
+description = ""
+authors = []
+
+[tool.poetry.dependencies]
+python = "^3.11"
+django = "^4.2.7"
+fastapi = "^0.103.2"
+uvicorn = "^0.20.0"
+whitenoise = "^6.6.0"
+gunicorn = "^21.2.0"
+pydantic = {extras = ["email"], version = "^2.5.0"}
+psycopg2 = "^2.9.9"
+requests = "^2.31.0"
+django-distance-field = "^1.2.5"
+pyhumps = "^3.8.0"
+nanoid = "^2.0.0"
+django-phonenumber-field = "^7.2.0"
+phonenumbers = "^8.13.25"
+premailer = "^3.10.0"
+django-redis = "^5.4.0"
+google-auth-oauthlib = "^1.1.0"
+google-auth = "^2.23.4"
+sendgrid = "^6.10.0"
+email-validator = "^2.1.0.post1"
+celery = {version = "5.3.4", extras = ["redis"]}
+grequests = "^0.6.0"
+requests-threads = "^0.1.1"
+aiohttp = {extras = ["speedups"], version = "^3.8.6"}
+python-magic = "^0.4.27"
+Unidecode = "^1.3.7"
+django-elasticsearch-dsl = "^8.0"
+django-ckeditor = "^6.7.0"
+googlemaps = "^4.10.0"
+Pillow = "^10.1.0"
+django-mptt = "^0.15.0"
+django-import-export = "^3.3.3"
+django-api-admin = "^1.1.6"
+drf-yasg = {extras = ["validation"], version = "^1.21.7"}
+djangorestframework-camel-case = "^1.4.2"
+python-multipart = "^0.0.6"
+django-extensions = "^3.2.3"
+django-debug-toolbar = "^4.2.0"
+django-jazzmin = "^2.6.0"
+
+
+[tool.poetry.group.dev.dependencies]
+Faker = "^20.0.0"
+watchfiles = "^0.20.0"
+django-stubs = {extras = ["compatible-mypy"], version = "^4.2.6"}
+python-gitlab = "3.15.0"
+types-requests = "^2.31.0.10"
+poetry-plugin-up = "^0.7.1"
+poetryup = "^0.12.7"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
+
+[tool.mypy]
+plugins = ["mypy_django_plugin.main"]
+
+[tool.django-stubs]
+django_settings_module = "conf.settings"
