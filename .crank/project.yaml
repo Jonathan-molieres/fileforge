@@ -1,0 +1,14 @@
+name: fileforge # Name of the project
+dev: # Development configuration
+    service: nginx # Service to compose up as main deamon
+deploy: # Deployment configuration
+    local: # Environment for local deployment tests
+        cluster: minikube # id of the cluster
+        minikube: true # set minikube environment
+        # namespace: fileforge-local
+    dev: # Environment for development iterative tests
+        cluster: fileforge-dev
+        # namespace: fileforge-dev
+    prod: # Environment for Product production
+        cluster: fileforge-prod
+        # namespace: fileforge-prod

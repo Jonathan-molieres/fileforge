@@ -1,0 +1,59 @@
+#!/bin/bash
+
+export DJANGO_SETTINGS_MODULE=conf.settings
+export DJANGO_ALLOW_ASYNC_UNSAFE=true
+export PYTHONPATH="${PYTHONPATH}:/app"
+export WATCHFILES_FORCE_POLLING="disabled"
+
+fastapi-start() {
+    export API_MODE=1
+    echo "Start fastapi server"
+    python uvicorn bin._fastapi:app --host 0.0.0.0 --port 8080 "$@"
+}
+
+celery-start() {
+    celery-reset
+    echo "Start celery worker"
+    python celery --app=bin._celery:app worker "$@"
+}
+
+celery-schedule() {
+    celery-reset
+    python celery --app=bin._celery:app beat -s /opt/celerybeat-schedule "$@"
+}
+
+celery-reset() {
+    echo "Reset celery"
+    pkill -f "/app/.venv/bin/celery"
+    python celery --app=bin._celery:app purge -f
+}
+
+django-start() {
+    echo "Start django server"
+    manage collectstatic --noinput
+    python gunicorn bin._wsgi:application --bind 0.0.0.0:8080 "$@"
+}
+
+migrate() {
+    manage migrate "$@"
+}
+
+test() {
+    manage test "$@"
+}
+
+task() {
+    manage task "$@"
+}
+
+manage() {
+    python bin/manage.py "$@"
+}
+
+python() {
+    poetry run "$@"
+}
+
+manage wait_for_db
+
+"$@"

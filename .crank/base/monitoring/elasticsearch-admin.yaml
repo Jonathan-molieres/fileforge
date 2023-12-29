@@ -1,0 +1,95 @@
+# ███████╗████████╗ █████╗ ████████╗███████╗███████╗██╗   ██╗██╗     ███████╗███████╗████████╗
+# ██╔════╝╚══██╔══╝██╔══██╗╚══██╔══╝██╔════╝██╔════╝██║   ██║██║     ██╔════╝██╔════╝╚══██╔══╝
+# ███████╗   ██║   ███████║   ██║   █████╗  █████╗  ██║   ██║██║     ███████╗█████╗     ██║
+# ╚════██║   ██║   ██╔══██║   ██║   ██╔══╝  ██╔══╝  ██║   ██║██║     ╚════██║██╔══╝     ██║
+# ███████║   ██║   ██║  ██║   ██║   ███████╗██║     ╚██████╔╝███████╗███████║███████╗   ██║
+# ╚══════╝   ╚═╝   ╚═╝  ╚═╝   ╚═╝   ╚══════╝╚═╝      ╚═════╝ ╚══════╝╚══════╝╚══════╝   ╚═╝
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+    name: elasticsearch-admin
+    labels:
+        app: elasticsearch-admin
+spec:
+    serviceName: elasticsearch-admin-service
+    replicas: 1
+    selector:
+        matchLabels:
+            app: elasticsearch-admin
+    template:
+        metadata:
+            labels:
+                app: elasticsearch-admin
+        spec:
+            containers:
+                - name: elasticsearch-admin-pod
+                  image: stephanediondev/elasticsearch-admin
+                  env:
+                      - name: ELASTICSEARCH_URL
+                        valueFrom:
+                            configMapKeyRef:
+                                name: config
+                                key: ELASTICSEARCH_URL
+                      - name: SECRET_REGISTER
+                        valueFrom:
+                            configMapKeyRef:
+                                name: config
+                                key: ELASTICSEARCH_ADMIN_SECRET_REGISTER
+                  ports:
+                      - containerPort: 8080
+                        name: http
+
+---
+# ███████╗███████╗██████╗ ██╗   ██╗██╗ ██████╗███████╗
+# ██╔════╝██╔════╝██╔══██╗██║   ██║██║██╔════╝██╔════╝
+# ███████╗█████╗  ██████╔╝██║   ██║██║██║     █████╗
+# ╚════██║██╔══╝  ██╔══██╗╚██╗ ██╔╝██║██║     ██╔══╝
+# ███████║███████╗██║  ██║ ╚████╔╝ ██║╚██████╗███████╗
+# ╚══════╝╚══════╝╚═╝  ╚═╝  ╚═══╝  ╚═╝ ╚═════╝╚══════╝
+kind: Service
+apiVersion: v1
+metadata:
+    name: elasticsearch-admin-service
+    labels:
+        app: elasticsearch-admin
+spec:
+    selector:
+        app: elasticsearch-admin
+    # clusterIP: None
+    ports:
+        - port: 8080
+          protocol: TCP
+          # targetPort: 8080
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+    name: elasticsearch-admin-ingress
+    generation: 1
+    annotations:
+        kubernetes.io/ingress.class: nginx
+        cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer
+        nginx.ingress.kubernetes.io/from-to-www-redirect: 'true'
+        nginx.ingress.kubernetes.io/force-ssl-redirect: 'true'
+        # nginx.ingress.kubernetes.io/rewrite-target: /$2
+        # nginx.ingress.kubernetes.io/use-regex: 'true'
+
+spec:
+    ingressClassName: nginx
+    rules:
+        - host: fileforge.egis-group.com
+          http:
+              paths:
+                  - path: /esadmin
+                    pathType: Prefix
+                    backend:
+                        service:
+                            name: elasticsearch-admin-service
+                            port:
+                                number: 8080
+
+    tls:
+        - hosts:
+              - fileforge.egis-group.com
+          secretName: letsencrypt-tls

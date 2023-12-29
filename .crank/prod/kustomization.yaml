@@ -1,0 +1,63 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: fileforge-prod
+resources:
+    - ../base
+patches:
+    #  ██████╗ ██████╗ ███╗   ██╗███████╗██╗ ██████╗
+    # ██╔════╝██╔═══██╗████╗  ██║██╔════╝██║██╔════╝
+    # ██║     ██║   ██║██╔██╗ ██║█████╗  ██║██║  ███╗
+    # ██║     ██║   ██║██║╚██╗██║██╔══╝  ██║██║   ██║
+    # ╚██████╗╚██████╔╝██║ ╚████║██║     ██║╚██████╔╝
+    #  ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝     ╚═╝ ╚═════╝
+    - target:
+          kind: ConfigMap
+          name: config
+      patch: |-
+          - op: replace
+            path: /data/DEBUG
+            value: '1'
+          - op: replace
+            path: /data/DOMAIN
+            value: fileforge.egis-group.com
+
+    # ██████╗ ███████╗ ██████╗ ██╗███████╗████████╗██████╗ ██╗   ██╗
+    # ██╔══██╗██╔════╝██╔════╝ ██║██╔════╝╚══██╔══╝██╔══██╗╚██╗ ██╔╝
+    # ██████╔╝█████╗  ██║  ███╗██║███████╗   ██║   ██████╔╝ ╚████╔╝
+    # ██╔══██╗██╔══╝  ██║   ██║██║╚════██║   ██║   ██╔══██╗  ╚██╔╝
+    # ██║  ██║███████╗╚██████╔╝██║███████║   ██║   ██║  ██║   ██║
+    # ╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═╝╚══════╝   ╚═╝   ╚═╝  ╚═╝   ╚═╝
+    - target:
+          kind: Deployment
+          # all deployments in namespace
+      patch: |-
+          - op: add
+            path: /spec/template/spec/imagePullSecrets
+            value: [{ name: container-registry-token }]
+    - target:
+          kind: Job
+          # all jobs in namespace
+      patch: |-
+          - op: add
+            path: /spec/template/spec/imagePullSecrets
+            value: [{ name: container-registry-token }]
+
+    # ██╗███╗   ██╗ ██████╗ ██████╗ ███████╗███████╗███████╗
+    # ██║████╗  ██║██╔════╝ ██╔══██╗██╔════╝██╔════╝██╔════╝
+    # ██║██╔██╗ ██║██║  ███╗██████╔╝█████╗  ███████╗███████╗
+    # ██║██║╚██╗██║██║   ██║██╔══██╗██╔══╝  ╚════██║╚════██║
+    # ██║██║ ╚████║╚██████╔╝██║  ██║███████╗███████║███████║
+    # ╚═╝╚═╝  ╚═══╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝
+    - target:
+          kind: Ingress
+          # all ingresses in namespace
+      patch: |-
+          - op: replace
+            path: /spec/rules/0/host
+            value: fileforge.egis-group.com
+          - op: replace
+            path: /spec/tls/0/hosts/0
+            value: fileforge.egis-group.com
+          - op: replace
+            path: /spec/tls/0/secretName
+            value: letsencrypt-tls

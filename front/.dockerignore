@@ -1,0 +1,7 @@
+.git
+*Dockerfile*
+node_modules
+.env
+.next
+.storybook
+.yarn-error.log

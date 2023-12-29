@@ -1,0 +1,91 @@
+# ██████╗ ███████╗██████╗ ██╗      ██████╗ ██╗   ██╗███╗   ███╗███████╗███╗   ██╗████████╗
+# ██╔══██╗██╔════╝██╔══██╗██║     ██╔═══██╗╚██╗ ██╔╝████╗ ████║██╔════╝████╗  ██║╚══██╔══╝
+# ██║  ██║█████╗  ██████╔╝██║     ██║   ██║ ╚████╔╝ ██╔████╔██║█████╗  ██╔██╗ ██║   ██║
+# ██║  ██║██╔══╝  ██╔═══╝ ██║     ██║   ██║  ╚██╔╝  ██║╚██╔╝██║██╔══╝  ██║╚██╗██║   ██║
+# ██████╔╝███████╗██║     ███████╗╚██████╔╝   ██║   ██║ ╚═╝ ██║███████╗██║ ╚████║   ██║
+# ╚═════╝ ╚══════╝╚═╝     ╚══════╝ ╚═════╝    ╚═╝   ╚═╝     ╚═╝╚══════╝╚═╝  ╚═══╝   ╚═╝
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: database-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: database
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: database
+    spec:
+      containers:
+        - name: database-container
+          image: postgis/postgis:14-master
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5432
+              protocol: TCP
+          env:
+            - name: POSTGRES_HOST_AUTH_METHOD
+              value: "trust"
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: database-data-volume
+              subPath: database
+          resources:
+            requests:
+              memory: "1024Mi"
+              cpu: "0.5"
+            limits:
+              memory: "2024Mi"
+              cpu: "1"
+      # tolerations:
+      #     - key: 'key'
+      #       operator: 'Exists'
+      #       effect: 'NoSchedule'
+      volumes:
+        - name: database-data-volume
+          persistentVolumeClaim:
+            claimName: database-persistent-volume-claim
+
+---
+# ██╗   ██╗ ██████╗ ██╗     ██╗   ██╗███╗   ███╗███████╗
+# ██║   ██║██╔═══██╗██║     ██║   ██║████╗ ████║██╔════╝
+# ██║   ██║██║   ██║██║     ██║   ██║██╔████╔██║█████╗
+# ╚██╗ ██╔╝██║   ██║██║     ██║   ██║██║╚██╔╝██║██╔══╝
+#  ╚████╔╝ ╚██████╔╝███████╗╚██████╔╝██║ ╚═╝ ██║███████╗
+#   ╚═══╝   ╚═════╝ ╚══════╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: database-persistent-volume-claim
+  labels:
+    app: database
+spec:
+  storageClassName: managed-premium
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+
+---
+# ███████╗███████╗██████╗ ██╗   ██╗██╗ ██████╗███████╗
+# ██╔════╝██╔════╝██╔══██╗██║   ██║██║██╔════╝██╔════╝
+# ███████╗█████╗  ██████╔╝██║   ██║██║██║     █████╗
+# ╚════██║██╔══╝  ██╔══██╗╚██╗ ██╔╝██║██║     ██╔══╝
+# ███████║███████╗██║  ██║ ╚████╔╝ ██║╚██████╗███████╗
+# ╚══════╝╚══════╝╚═╝  ╚═╝  ╚═══╝  ╚═╝ ╚═════╝╚══════╝
+apiVersion: v1
+kind: Service
+metadata:
+  name: database-service
+spec:
+  type: NodePort
+  ports:
+    - port: 5432
+      protocol: TCP
+  selector:
+    app: database
